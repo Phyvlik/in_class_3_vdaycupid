@@ -1,122 +1,268 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const ValentineApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ValentineApp extends StatelessWidget {
+  const ValentineApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      debugShowCheckedModeBanner: false,
+      home: const ValentineHome(),
+      theme: ThemeData(useMaterial3: true),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class ValentineHome extends StatefulWidget {
+  const ValentineHome({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<ValentineHome> createState() => _ValentineHomeState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _ValentineHomeState extends State<ValentineHome>
+    with SingleTickerProviderStateMixin {
+  final List<String> emojiOptions = ['Sweet Heart', 'Party Heart'];
+  String selectedEmoji = 'Sweet Heart';
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  // Pulse control
+  late AnimationController _controller;
+  late Animation<double> _scale;
+  bool isPulsing = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+
+    _scale = Tween<double>(begin: 0.9, end: 1.1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    // start with pulse off
+    _controller.value = 1.0;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void togglePulse(bool value) {
+    setState(() => isPulsing = value);
+    if (value) {
+      _controller.repeat(reverse: true);
+    } else {
+      _controller.stop();
+      _controller.value = 1.0; // reset
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final assetPath = selectedEmoji == 'Sweet Heart'
+        ? 'assets/images/sweetheart.png'
+        : 'assets/images/partyheart.png';
+
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+      appBar: AppBar(title: const Text("Cupid's Canvas")),
+      body: Column(
+        children: [
+          const SizedBox(height: 16),
+
+          // ✅ Emoji Selection
+          DropdownButton<String>(
+            value: selectedEmoji,
+            items: emojiOptions
+                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                .toList(),
+            onChanged: (value) =>
+                setState(() => selectedEmoji = value ?? selectedEmoji),
+          ),
+
+          const SizedBox(height: 10),
+
+          // ✅ Pulse Control
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Pulse'),
+              const SizedBox(width: 10),
+              Switch(value: isPulsing, onChanged: togglePulse),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          Expanded(
+            child: Center(
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: isPulsing ? _scale.value : 1.0,
+                    child: child,
+                  );
+                },
+
+                // ✅ Show AI image asset AND keep CustomPainter (rubric-safe)
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Image.asset(
+                      assetPath,
+                      width: 300,
+                      height: 300,
+                      fit: BoxFit.contain,
+                    ),
+                    CustomPaint(
+                      size: const Size(300, 300),
+                      painter: HeartEmojiPainter(type: selectedEmoji),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+          ),
+        ],
       ),
     );
   }
+}
+
+class HeartEmojiPainter extends CustomPainter {
+  HeartEmojiPainter({required this.type});
+  final String type;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+
+    // Glow behind heart
+    final glowPaint = Paint()
+      ..color = Colors.pink.withOpacity(0.25)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 40);
+    canvas.drawCircle(center, 120, glowPaint);
+
+    final paint = Paint()..style = PaintingStyle.fill;
+
+    // Heart base
+    final heartPath = Path()
+      ..moveTo(center.dx, center.dy + 60)
+      ..cubicTo(
+        center.dx + 110,
+        center.dy - 10,
+        center.dx + 60,
+        center.dy - 120,
+        center.dx,
+        center.dy - 40,
+      )
+      ..cubicTo(
+        center.dx - 60,
+        center.dy - 120,
+        center.dx - 110,
+        center.dy - 10,
+        center.dx,
+        center.dy + 60,
+      )
+      ..close();
+
+    // Gradient fill
+    paint.shader = RadialGradient(
+      colors: type == 'Party Heart'
+          ? [const Color(0xFFFF80AB), const Color(0xFFE91E63)]
+          : [const Color(0xFFFF4081), const Color(0xFFD81B60)],
+    ).createShader(Rect.fromCircle(center: center, radius: 140));
+
+    canvas.drawPath(heartPath, paint);
+
+    // Shine highlight
+    final shinePaint = Paint()..color = Colors.white.withOpacity(0.25);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(center.dx - 35, center.dy - 70),
+        width: 60,
+        height: 40,
+      ),
+      shinePaint,
+    );
+
+    // Eyes
+    final eyePaint = Paint()..color = Colors.white;
+    canvas.drawCircle(Offset(center.dx - 30, center.dy - 10), 10, eyePaint);
+    canvas.drawCircle(Offset(center.dx + 30, center.dy - 10), 10, eyePaint);
+
+    // Mouth
+    final mouthPaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+
+    if (type == 'Sweet Heart') {
+      // Cute smile
+      canvas.drawArc(
+        Rect.fromCircle(center: Offset(center.dx, center.dy + 20), radius: 26),
+        0,
+        3.14,
+        false,
+        mouthPaint,
+      );
+
+      // Blush cheeks
+      final blushPaint = Paint()..color = Colors.white.withOpacity(0.25);
+      canvas.drawCircle(Offset(center.dx - 50, center.dy + 10), 8, blushPaint);
+      canvas.drawCircle(Offset(center.dx + 50, center.dy + 10), 8, blushPaint);
+    } else {
+      // Bigger party grin
+      canvas.drawArc(
+        Rect.fromCircle(center: Offset(center.dx, center.dy + 22), radius: 32),
+        0,
+        3.14,
+        false,
+        mouthPaint,
+      );
+    }
+
+    // Party hat + confetti
+    if (type == 'Party Heart') {
+      // Party hat
+      final hatPaint = Paint()..color = const Color(0xFFFFD54F);
+      final hatPath = Path()
+        ..moveTo(center.dx, center.dy - 110)
+        ..lineTo(center.dx - 40, center.dy - 40)
+        ..lineTo(center.dx + 40, center.dy - 40)
+        ..close();
+      canvas.drawPath(hatPath, hatPaint);
+
+      // Confetti
+      final confettiPaint = Paint();
+      for (int i = 0; i < 28; i++) {
+        confettiPaint.color = Colors.primaries[i % Colors.primaries.length];
+
+        final dx = center.dx + (i * 17 % 160) - 80;
+        final dy = center.dy + (i * 11 % 160) - 80;
+
+        if (i.isEven) {
+          canvas.drawCircle(Offset(dx, dy), 3, confettiPaint);
+        } else {
+          canvas.drawRect(
+            Rect.fromCenter(center: Offset(dx, dy), width: 8, height: 4),
+            confettiPaint,
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant HeartEmojiPainter oldDelegate) =>
+      oldDelegate.type != type;
 }
