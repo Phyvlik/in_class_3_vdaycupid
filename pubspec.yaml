@@ -1,3 +1,14 @@
+<<<<<<< HEAD
+name: valentines_app
+description: "Cupid Valentine's CustomPainter App"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+=======
 name: in_class_3
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
@@ -27,17 +38,31 @@ environment:
 # dependencies can be manually updated by changing the version numbers below to
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
+>>>>>>> origin/main
 dependencies:
   flutter:
     sdk: flutter
 
+<<<<<<< HEAD
+=======
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
+>>>>>>> origin/main
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+<<<<<<< HEAD
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # 👇 THIS IS THE IMPORTANT PART
+  assets:
+    - assets/images/
+=======
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -90,3 +115,4 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+>>>>>>> origin/main
